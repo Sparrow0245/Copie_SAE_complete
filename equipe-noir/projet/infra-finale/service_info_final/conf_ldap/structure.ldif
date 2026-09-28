@@ -1,0 +1,14 @@
+dn: dc=noir,dc=iut
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: Noir IUT
+dc: noir
+
+dn: ou=users,dc=noir,dc=iut
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=noir,dc=iut
+objectClass: organizationalUnit
+ou: groups

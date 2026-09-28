@@ -1,0 +1,17 @@
+$TTL    604800
+@   IN  SOA iut. admin.noir.iut. (
+        2025100801 ; Serial
+        3600       ; Refresh
+        1800       ; Retry
+        604800     ; Expire
+        86400 )    ; Minimum TTL
+
+@       IN      NS      ns1.noir.iut.
+@       IN      NS      ns2.noir.iut.
+@	IN	MX 10	mail.noir.iut.
+
+ns1      IN      A       192.168.4.10
+ns2      IN      A       192.168.4.11
+resolver IN      A       192.168.4.20
+www      IN      A       192.168.4.30
+mail     IN      A       192.168.4.40

@@ -1,0 +1,96 @@
+
+!
+! Last configuration change at 03:50:06 UTC Mon Jan 1 1900
+! NVRAM config last updated at 03:50:54 UTC Mon Jan 1 1900
+! NVRAM config last updated at 03:50:54 UTC Mon Jan 1 1900
+version 15.1
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname Router
+!
+boot-start-marker
+boot-end-marker
+!
+!
+!
+no aaa new-model
+!
+memory-size iomem 10
+crypto pki token default removal timeout 0
+!
+!
+ip source-route
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+license udi pid CISCO881-SEC-K9 sn FCZ1709C1Z0
+!
+!
+!
+!
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+interface FastEthernet0
+ no ip address
+!
+interface FastEthernet1
+ no ip address
+!
+interface FastEthernet2
+ no ip address
+!
+interface FastEthernet3
+ no ip address
+!
+interface FastEthernet4
+ ip address 192.168.10.4 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ ip address 192.168.4.254 255.255.255.0
+!
+router rip
+ version 2
+ network 192.168.4.0
+ network 192.168.10.0
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+!
+!
+!
+!
+!
+!
+control-plane
+!
+!
+line con 0
+ no modem enable
+line aux 0
+line vty 0 4
+ login
+ transport input all
+!
+end

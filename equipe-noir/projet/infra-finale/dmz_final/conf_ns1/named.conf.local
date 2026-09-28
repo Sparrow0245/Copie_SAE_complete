@@ -1,0 +1,17 @@
+zone "noir.iut" {
+    type master;
+    file "/var/cache/bind/db.noir.iut";
+    allow-transfer { 192.168.4.11; };
+};
+
+zone "iut" {
+    type master;
+    file "/var/cache/bind/db.iut";
+    allow-transfer { 192.168.4.11; };
+};
+
+zone "4.168.192.in-addr.arpa" {
+    type master;
+    file "/var/cache/bind/db.192.168.4";
+    allow-transfer { 192.168.4.11; };
+};

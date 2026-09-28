@@ -1,0 +1,17 @@
+zone "noir.iut" {
+    type slave;
+    file "/var/cache/bind/db.noir.iut";
+    masters { 192.168.4.10; };
+};
+
+zone "iut" {
+    type slave;
+    file "/var/cache/bind/db.iut";
+    masters { 192.168.4.10; };
+};
+
+zone "4.168.192.in-addr.arpa" {
+    type slave;
+    file "/var/cache/bind/db.192.168.4";
+    masters { 192.168.4.10; };
+};

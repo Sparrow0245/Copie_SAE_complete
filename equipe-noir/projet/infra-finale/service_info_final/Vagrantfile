@@ -1,0 +1,114 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  config.vm.define "dhcp" do |dhcp|
+    dhcp.vm.hostname = "dhcp"
+    dhcp.vm.network "public_network", ip: "192.168.4.80", netmask: "255.255.255.192", bridge: "enp3s0"
+    dhcp.vm.synced_folder "conf_dhcp/", "/root/conf/"
+    dhcp.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y isc-dhcp-server
+    cp /root/conf/dhcpd.conf /etc/dhcp/dhcpd.conf
+    cp /root/conf/isc-dhcp-server /etc/default/isc-dhcp-server 
+    systemctl restart isc-dhcp-server
+    ip r add 192.168.0.0/16 via 192.168.4.126 dev eth1 || true
+    ip r add 192.168.4.64 via 192.168.4.126 dev eth1 || true
+SHELL
+  end
+
+   config.vm.define "ldap" do |ldap|
+    ldap.vm.hostname = "ldap"
+    ldap.vm.network "public_network", ip: "192.168.4.70", netmask: "255.255.255.192", bridge: "enp3s0"
+    ldap.vm.synced_folder "conf_ldap/", "/root/conf/"
+    ldap.vm.provision "shell", inline: <<-SHELL
+    export DEBIAN_FRONTEND=noninteractive
+
+  apt-get update
+  apt-get install -y slapd ldap-utils
+
+  systemctl restart slapd
+  ip r add 192.168.0.0/16 via 192.168.4.126 dev eth1 || true
+  ip r add 192.168.4.64 via 192.168.4.126 dev eth1 || true
+SHELL
+  end
+
+   config.vm.define "nfs" do |nfs|
+    nfs.vm.hostname = "nfs"
+    nfs.vm.network "public_network", ip: "192.168.4.90", netmask: "255.255.255.192", bridge: "enp3s0"
+    nfs.vm.synced_folder "conf_nfs/", "/root/conf/"
+    nfs.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y nfs-kernel-server
+sudo mkdir -p /home/users/maxence
+sudo mkdir -p /home/users/sofiane
+sudo mkdir -p /home/users/vincent
+
+sudo chown -R 10001:10001 /home/users/maxence
+sudo chown -R 10002:10002 /home/users/sofiane
+sudo chown -R 10003:10003 /home/users/vincent
+
+echo "/home/users 192.168.4.128/26(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+echo "/home/users 192.168.4.64/26(rw,sync,no_subtree_check,no_root_squash)" | sudo tee -a /etc/exports
+      systemctl restart nfs-kernel-server
+      ip r add 192.168.0.0/16 via 192.168.4.126 dev eth1 || true
+      ip r add 192.168.4.64 via 192.168.4.126 dev eth1 || true
+SHELL
+  end
+
+   config.vm.define "client" do |client|
+    client.vm.hostname = "client"
+    client.vm.network "public_network", bridge: "enp3s0"
+    client.vm.synced_folder "conf_client/", "/root/conf/"
+    client.vm.provision "shell", inline: <<-SHELL
+    ip r add 192.168.0.0/16 via 192.168.4.126 dev eth1 || true
+    ip r add 192.168.4.64 via 192.168.4.126 dev eth1 || true
+    apt-get update
+    apt-get install -y firefox-esr thunderbird xfce4 lightdm mailutils ldap-utils nfs-common 
+    cp /root/conf/resolv.conf /etc/resolv.conf
+    dhclient -r 
+    dhclient -v eth1
+
+        id -u maxence &>/dev/null || adduser --gecos "" --disabled-password maxence
+        echo "maxence:maxence" | chpasswd
+        id -u sofiane &>/dev/null || adduser --gecos "" --disabled-password sofiane
+        echo "sofiane:sofiane" | chpasswd
+        id -u vincent &>/dev/null || adduser --gecos "" --disabled-password vincent
+
+sudo mkdir -p /usr/lib/thunderbird/defaults/pref
+
+cat <<EOF | sudo tee /usr/lib/thunderbird/defaults/pref/autoconfig.js
+pref("general.config.filename", "thunderbird.cfg");
+pref("general.config.obscure_value", 0);
+EOF
+
+cat <<EOF | sudo tee /usr/lib/thunderbird/thunderbird.cfg
+//
+var user = getenv("USER");
+defaultPref("mail.account.account1.server", "server1");
+defaultPref("mail.accountmanager.accounts", "account1");
+defaultPref("mail.server.server1.hostname", "192.168.4.40");
+defaultPref("mail.server.server1.port", 143);
+defaultPref("mail.server.server1.type", "imap");
+defaultPref("mail.server.server1.userName", user);
+defaultPref("mail.server.server1.name", user + "@noir.iut");
+defaultPref("mail.server.server1.authMethod", 3);
+defaultPref("mail.server.server1.socketType", 0);
+defaultPref("mail.smtpserver.smtp1.hostname", "192.168.4.40");
+defaultPref("mail.smtpserver.smtp1.port", 25);
+defaultPref("mail.smtpserver.smtp1.auth_method", 0);
+defaultPref("mail.smtpserver.smtp1.try_ssl", 0);
+defaultPref("mail.smtpservers", "smtp1");
+defaultPref("mail.account.account1.identities", "id1");
+defaultPref("mail.identity.id1.useremail", user + "@noir.iut");
+defaultPref("mail.identity.id1.fullName", user);
+defaultPref("mail.identity.id1.smtpServer", "smtp1");
+EOF
+
+   reboot
+SHELL
+client.vm.provider "virtualbox" do |v|
+    v.memory = "4096"
+
+	end
+    end
+end

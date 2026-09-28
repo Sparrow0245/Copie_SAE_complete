@@ -1,0 +1,124 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  config.vm.define "client_admin1" do |admin1|
+    admin1.vm.hostname = "client-admin1"
+    admin1.vm.network "public_network", bridge: "enp3s0"
+    admin1.vm.synced_folder "conf_client_admin1/", "/root/conf/"
+    admin1.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+    end
+    admin1.vm.provision "shell", inline: <<-SHELL
+
+     ip r add 192.168.0.0/16 via 192.168.4.190 dev eth1 || true
+     ip r add 192.168.4.128 via 192.168.4.190 dev eth1 || true
+
+      apt-get update
+      apt-get install -y firefox-esr thunderbird xfce4 lightdm mailutils nfs-common ldap-utils
+
+    dhclient -r
+    dhclient -v eth1
+
+    cp /root/conf/resolv.conf /etc/resolv.conf
+
+        id -u maxence &>/dev/null || adduser --gecos "" --disabled-password maxence
+        echo "maxence:maxence" | chpasswd
+        id -u sofiane &>/dev/null || adduser --gecos "" --disabled-password sofiane
+        echo "sofiane:sofiane" | chpasswd
+        id -u vincent &>/dev/null || adduser --gecos "" --disabled-password vincent
+        echo "vincent:vincent" | chpasswd
+
+sudo mkdir -p /usr/lib/thunderbird/defaults/pref
+
+cat <<EOF | sudo tee /usr/lib/thunderbird/defaults/pref/autoconfig.js
+pref("general.config.filename", "thunderbird.cfg");
+pref("general.config.obscure_value", 0);
+EOF
+
+cat <<EOF | sudo tee /usr/lib/thunderbird/thunderbird.cfg
+//
+var user = getenv("USER");
+defaultPref("mail.account.account1.server", "server1");
+defaultPref("mail.accountmanager.accounts", "account1");
+defaultPref("mail.server.server1.hostname", "192.168.4.40");
+defaultPref("mail.server.server1.port", 143);
+defaultPref("mail.server.server1.type", "imap");
+defaultPref("mail.server.server1.userName", user);
+defaultPref("mail.server.server1.name", user + "@noir.iut");
+defaultPref("mail.server.server1.authMethod", 3);
+defaultPref("mail.server.server1.socketType", 0);
+defaultPref("mail.smtpserver.smtp1.hostname", "192.168.4.40");
+defaultPref("mail.smtpserver.smtp1.port", 25);
+defaultPref("mail.smtpserver.smtp1.auth_method", 0);
+defaultPref("mail.smtpserver.smtp1.try_ssl", 0);
+defaultPref("mail.smtpservers", "smtp1");
+defaultPref("mail.account.account1.identities", "id1");
+defaultPref("mail.identity.id1.useremail", user + "@noir.iut");
+defaultPref("mail.identity.id1.fullName", user);
+defaultPref("mail.identity.id1.smtpServer", "smtp1");
+EOF
+
+      reboot
+    SHELL
+  end
+
+  config.vm.define "client_admin2" do |admin2|
+    admin2.vm.hostname = "client-admin2"
+    admin2.vm.network "public_network", bridge: "enp3s0"
+    admin2.vm.synced_folder "conf_client_admin2/", "/root/conf/"
+    admin2.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+    end
+    admin2.vm.provision "shell", inline: <<-SHELL
+    ip r add 192.168.0.0/16 via 192.168.4.190 dev eth1 || true
+    ip r add 192.168.4.128 via 192.168.4.190 dev eth1 || true
+
+      apt-get update
+      apt-get install -y firefox-esr thunderbird xfce4 lightdm mailutils nfs-common ldap-utils
+
+    dhclient -r
+    dhclient -v eth1
+ 
+    cp /root/conf/resolv.conf /etc/resolv.conf
+    
+        id -u maxence &>/dev/null || adduser --gecos "" --disabled-password maxence
+        echo "maxence:maxence" | chpasswd
+        id -u sofiane &>/dev/null || adduser --gecos "" --disabled-password sofiane
+        echo "sofiane:sofiane" | chpasswd
+        id -u vincent &>/dev/null || adduser --gecos "" --disabled-password vincent
+        echo "vincent:vincent" | chpasswd
+
+sudo mkdir -p /usr/lib/thunderbird/defaults/pref
+
+cat <<EOF | sudo tee /usr/lib/thunderbird/defaults/pref/autoconfig.js
+pref("general.config.filename", "thunderbird.cfg");
+pref("general.config.obscure_value", 0);
+EOF
+
+cat <<EOF | sudo tee /usr/lib/thunderbird/thunderbird.cfg
+//
+var user = getenv("USER");
+defaultPref("mail.account.account1.server", "server1");
+defaultPref("mail.accountmanager.accounts", "account1");
+defaultPref("mail.server.server1.hostname", "192.168.4.40");
+defaultPref("mail.server.server1.port", 143);
+defaultPref("mail.server.server1.type", "imap");
+defaultPref("mail.server.server1.userName", user);
+defaultPref("mail.server.server1.name", user + "@noir.iut");
+defaultPref("mail.server.server1.authMethod", 3);
+defaultPref("mail.server.server1.socketType", 0);
+defaultPref("mail.smtpserver.smtp1.hostname", "192.168.4.40");
+defaultPref("mail.smtpserver.smtp1.port", 25);
+defaultPref("mail.smtpserver.smtp1.auth_method", 0);
+defaultPref("mail.smtpserver.smtp1.try_ssl", 0);
+defaultPref("mail.smtpservers", "smtp1");
+defaultPref("mail.account.account1.identities", "id1");
+defaultPref("mail.identity.id1.useremail", user + "@noir.iut");
+defaultPref("mail.identity.id1.fullName", user);
+defaultPref("mail.identity.id1.smtpServer", "smtp1");
+EOF
+
+      reboot
+    SHELL
+  end
+end

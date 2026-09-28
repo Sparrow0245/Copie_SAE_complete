@@ -1,0 +1,42 @@
+// équipe noir
+zone "iut" {
+    type forward;
+    forward only;
+    forwarders { 192.168.4.10; };
+};
+
+zone "noir.iut" {
+    type forward;
+    forward only;
+    forwarders { 192.168.4.10; };
+};
+
+zone "4.168.192.in-addr.arpa" {
+    type forward;
+    forward only;
+    forwarders { 192.168.4.10; };
+};
+
+//équipe Vert
+zone "vert.iut" {
+    type forward;
+    forward only;
+    forwarders { 192.168.3.194; };
+};
+
+
+//équipe Blanc
+zone "blanc.iut" {
+    type forward;
+    forward only;
+    forwarders { 192.168.1.98; };
+};
+
+
+//équipe Rouge
+zone "rouge.iut" {
+    type forward;
+    forward only;
+    forwarders { 192.168.2.5; };
+};
+

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Équipe Noir — FAI</title>
+    <meta name="description" content="Page basique de l'équipe NOIR — Fournisseur d'accès Internet (FAI)." />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="wrap" role="main">
+        <header>
+            <div class="brand">
+                <div class="logo" aria-hidden="true">FAI</div>
+                <div>
+                    <h1>Équipe Noir — FAI</h1>
+                    <p class="lead">Solutions réseau, connectivité et infrastructure opérateur.</p>
+                </div>
+            </div>
+            <nav aria-label="Navigation principale">
+                <a href="#about">À propos</a>
+                <a href="#services">Services</a>
+                <a href="#team">Équipe</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </header>
+
+        <main>
+            <div>
+                <section id="about" class="card hero" aria-labelledby="about-title">
+                    <h2 id="about-title">Qui sommes-nous</h2>
+                    <p class="lead">L'équipe noire est le groupe qui fournit l'accès internet vers l'extérieur aux autres équipes (verte, rouge, blanche)</p>
+                </section>
+
+                <section id="services" class="card" aria-labelledby="services-title">
+                    <h3 id="services-title">Nos services</h3>
+                    <div class="services" role="list">
+                        <div class="service" role="listitem"><strong>Connectivité</strong><div style="color:var(--muted);font-size:13px;margin-top:6px">FTTH, DSL, liens dédiés</div></div>
+                        <div class="service" role="listitem"><strong>Routage & Peering</strong><div style="color:var(--muted);font-size:13px;margin-top:6px">BGP, optimisation</div></div>
+                        <div class="service" role="listitem"><strong>Sécurité</strong><div style="color:var(--muted);font-size:13px;margin-top:6px">Firewalls, audits</div></div>
+                        <div class="service" role="listitem"><strong>Hébergement</strong><div style="color:var(--muted);font-size:13px;margin-top:6px">Serveurs dédiés, VPS</div></div>
+                    </div>
+                </section>
+
+                <section id="team" class="card" aria-labelledby="team-title">
+                    <h3 id="team-title">L'équipe</h3>
+                    <div class="team-list">
+                        <div class="member">
+                            <div class="avatar">V</div>
+                            <div>
+                                <strong>Vincent</strong>
+                                <div style="color:var(--muted);font-size:13px">Ingénieur réseau</div>
+                            </div>
+                        </div>
+                        <div class="member">
+                            <div class="avatar">M</div>
+                            <div>
+                                <strong>Maxence</strong>
+                                <div style="color:var(--muted);font-size:13px">Opérations & monitoring</div>
+                            </div>
+                        </div>
+                        <div class="member">
+                            <div class="avatar">S</div>
+                            <div>
+                                <strong>Sofiane</strong>
+                                <div style="color:var(--muted);font-size:13px">Sécurité & audits</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer>
+                    <div>© Équipe Noir — FAI. Page basique de présentation.</div>
+                </footer>
+            </div>
+
+            <aside class="card contact" aria-labelledby="contact-title">
+                <h3 id="contact-title">Contact</h3>
+                <p style="color:var(--muted);font-size:13px">Pour informations ou collaboration, envoyez-nous un message.</p>
+                <form action="#" method="post" onsubmit="alert('Formulaire de démonstration — configurez une action serveur.'); return false;">
+                    <input type="text" name="name" placeholder="Nom" required />
+                    <input type="email" name="email" placeholder="email@exemple.local" required />
+                    <textarea name="message" rows="5" placeholder="Votre message..." required></textarea>
+                    <button type="submit">Envoyer</button>
+                </form>
+                <div style="margin-top:12px;color:var(--muted);font-size:13px">
+                    Adresse : <strong>info@equipe-noir.local</strong><br/>
+                    Téléphone : <strong>+33 0X XX XX XX XX</strong>
+                </div>
+            </aside>
+        </main>
+    </div>
+</body>
+</html></div>

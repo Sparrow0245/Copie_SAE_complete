@@ -1,0 +1,38 @@
+dn: uid=maxence,ou=users,dc=noir,dc=iut
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Maxence Antoine
+sn: Antoine
+uid: maxence
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory: /home/users/maxence
+loginShell: /bin/bash
+userPassword: {SSHA}mlX5pdMHPxj5vw/jzNx/IR4IDS7vckZc
+
+dn: uid=sofiane,ou=users,dc=noir,dc=iut
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Sofiane El Bouhali
+sn: El Bouhali
+uid: sofiane
+uidNumber: 10002
+gidNumber: 10002
+homeDirectory: /home/users/sofiane
+loginShell: /bin/bash
+userPassword: {SSHA}mlX5pdMHPxj5vw/jzNx/IR4IDS7vckZc
+
+dn: uid=vincent,ou=users,dc=noir,dc=iut
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+cn: Vincent Jacquemelle
+sn: Jacquemelle
+uid: vincent
+uidNumber: 10003
+gidNumber: 10003
+homeDirectory: /home/users/vincent
+loginShell: /bin/bash
+userPassword: {SSHA}mlX5pdMHPxj5vw/jzNx/IR4IDS7vckZc
