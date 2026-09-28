@@ -1,0 +1,97 @@
+#!/bin/bash
+if [ $# != 1 ]; then
+    echo "Usage: douglas09.sh < create | destroy >"
+    echo "Error: no or too much arguments"
+    exit 1
+fi
+
+INTERFACE="enp3s0"
+## TODO
+# sudo ip addr flush dev $INTERFACE
+# sudo ip link set dev $INTERFACE up
+# sudo ip addr add 192.168.4.XX/26 dev $INTERFACE
+# sudo ip route add 192.168.0.0/16 via 192.168.4.XX dev $INTERFACE
+
+if [ $1 == "create" ]; then
+    set -e
+
+    ### Configuration de l'interface réseau
+
+    ### VMs
+    export 'VBOXES=/home/cisco/VirtualBox VMs/'
+    export 'MODELE=/home/cisco/bookworm-12.12.vdi'
+
+    id=1
+    for vm in ldap nfs dhcp client_info; do
+        vboxmanage createvm --name $vm --ostype Debian_64 --basefolder "$VBOXES" --register
+        vboxmanage clonemedium --format VMDK disk "$MODELE" "$VBOXES/$vm/$vm.vdi"
+        vboxmanage storagectl $vm --name controller1 --add scsi
+        vboxmanage storageattach $vm --storagectl controller1 --port 0 --device 0 --type hdd --medium "$VBOXES/$vm/$vm.vdi"
+
+        vboxmanage modifyvm $vm --memory 4096 
+        vboxmanage modifyvm $vm --cpus 2
+        vboxmanage modifyvm $vm --nic1 nat
+        vboxmanage modifyvm $vm --natpf1 "guestssh,tcp,,220${id},,22"
+        vboxmanage modifyvm $vm --nic2 bridged
+        vboxmanage modifyvm $vm --bridgeadapter2 enp3s0
+        vboxmanage modifyvm $vm --vram 128
+        vboxmanage modifyvm $vm --drag-and-drop bidirectional
+        vboxmanage modifyvm $vm --clipboard bidirectional
+        vboxmanage modifyvm $vm --defaultfrontend headless
+
+        vboxmanage sharedfolder add $vm --name conf_$vm --hostpath /home/cisco/service_info/conf_$vm --automount
+        id=$((id + 1))
+    done
+
+    sleep 30s
+
+    ### Démarrage des VMs
+    vboxmanage startvm ldap 
+    vboxmanage startvm nfs 
+    vboxmanage startvm dhcp 
+    vboxmanage startvm client_info 
+    for i in {1..90} ; do
+        printf "\rAttente de la configuration des VMs%-5s" "$(printf '.%.0s' $(seq 1 $((i % 5 + 1))))"
+        sleep 1s
+    done
+
+    ### Partage des dossiers de configuration
+
+    for vm in ldap nfs dhcp client_info; do
+        vboxmanage guestcontrol $vm copyto --username=root --password=root --target-directory=/tmp/ /home/cisco/service_info/scripts/vm/douglas09/$vm.sh
+        vboxmanage guestcontrol $vm run --username=root --password=root /bin/chmod +x /tmp/$vm.sh
+        vboxmanage guestcontrol $vm run --username=root --password=root /tmp/$vm.sh
+    done
+
+elif [ $1 == "destroy" ]; then
+    vboxmanage controlvm ldap poweroff
+    vboxmanage controlvm nfs poweroff
+    vboxmanage controlvm dhcp poweroff
+    vboxmanage controlvm client_info poweroff
+
+    sleep 20s
+
+    vboxmanage unregistervm ldap --delete-all
+    vboxmanage unregistervm nfs --delete-all
+    vboxmanage unregistervm dhcp --delete-all
+    vboxmanage unregistervm client_info --delete-all
+
+    list=$(vboxmanage list hdds | grep -e "^UUID" -e "^Location")
+
+    echo "disks restants :"
+    echo "$list" 
+    
+    disk="vboxmanage list hdds | grep "^UUID" | tail -2 | cut -d ' ' -f 12"
+    ## should be only one line i need to keep (bookworm-12.12.vdi), but in case of broken script, we close admin disks
+    if [ $(echo "$disk" | wc -l) -gt 1 ]; then
+        echo "$disk" | while read -r line; do
+            vboxmanage closemedium disk "$line" --delete
+        done
+    fi
+
+else
+    echo "Usage: douglas09.sh < create | destroy >"
+    echo "Error: no argument corresponding to $1"
+    exit 1
+fi
+
