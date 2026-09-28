@@ -1,0 +1,14 @@
+dn: uid=neckman,ou=users,dc=rouge,dc=iut
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: neckman
+cn: Nicolas ECKMAN
+sn: ECKMAN
+givenName: Nicolas
+mail: neckman@rouge.iut
+userPassword: {SSHA}Ztu8k8kpPr2KKOJqUrT71PoZcY6+Zm+X
+uidNumber: 10001
+gidNumber: 10000
+homeDirectory: /home/neckman
+loginShell: /bin/bash

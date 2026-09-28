@@ -1,0 +1,4 @@
+zone "rouge.iut" {
+    type master;
+    file "/etc/bind/db.rouge.iut";
+};

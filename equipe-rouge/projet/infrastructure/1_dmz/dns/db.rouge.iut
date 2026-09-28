@@ -1,0 +1,23 @@
+; bind data
+$TTL    604800
+@                   IN      SOA     ns.rouge.iut. admin.rouge.iut. (
+                                2025121400      ; serial
+                                604800          ; refresh
+                                86400           ; retry
+                                2419200         ; expire
+                                604800          ; negative cache ttl
+)
+
+; ns
+@                   IN      NS      ns.rouge.iut.
+
+; service records
+www                 IN      A       192.168.2.3
+mail                IN      A       192.168.2.4
+ns                  IN      A       192.168.2.5
+
+; mx
+@                   IN      MX      10 mail.rouge.iut.
+
+; autoconfig for thunderbird
+autoconfig          IN      A       192.168.2.3

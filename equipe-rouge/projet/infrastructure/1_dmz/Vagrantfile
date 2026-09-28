@@ -1,0 +1,113 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+    vb.cpus = 2
+  end
+  
+  config.vm.provision "shell", inline: <<-SHELL
+    ip route replace 192.168.0.0/16 via 192.168.2.1
+  SHELL
+
+  config.vm.define "web" do |web|
+    web.vm.hostname = "web"
+    web.vm.network "public_network",
+      ip: "192.168.2.3",
+      netmask: "255.255.255.224",
+      bridge: "enp3s0"
+    web.vm.provision "shell", inline: <<-SHELL
+apt update
+apt install -y nginx
+
+cp /vagrant/web/configurations/rouge /etc/nginx/sites-available/rouge
+cp /vagrant/web/configurations/autoconfig /etc/nginx/sites-available/autoconfig
+
+mkdir -p /var/www/autoconfig/mail
+cp /vagrant/web/pages/autoconfig.xml /var/www/autoconfig/mail/config-v1.1.xml
+
+rm -f /etc/nginx/sites-enabled/default
+
+ln -s /etc/nginx/sites-available/rouge /etc/nginx/sites-enabled
+ln -s /etc/nginx/sites-available/autoconfig /etc/nginx/sites-enabled
+
+cp /vagrant/web/pages/index.html /var/www/html/index.html
+
+cp /vagrant/_global/resolv.conf /etc/resolv.conf
+
+systemctl enable nginx
+systemctl restart nginx
+
+echo "Web server for domain www.rouge.iut is up and running"
+    SHELL
+  end
+
+  config.vm.define "mail" do |mail|
+    mail.vm.hostname = "mail"
+    mail.vm.network "public_network",
+      ip: "192.168.2.4",
+      netmask: "255.255.255.224",
+      bridge: "enp3s0"
+    mail.vm.provision "shell", inline: <<-SHELL
+apt update
+DEBIAN_FRONTEND=noninteractive apt install -y postfix postfix-ldap dovecot-core dovecot-imapd dovecot-ldap dovecot-pop3d ldap-utils libsasl2-modules-ldap
+
+echo "postfix postfix/mailname string rouge.iut" | debconf-set-selections
+echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections
+
+dpkg-reconfigure -f noninteractive postfix
+
+sleep 3
+
+cp /vagrant/mail/postfix/main.cf /etc/postfix/main.cf
+cp /vagrant/mail/postfix/ldap-users.cf /etc/postfix/ldap-users.cf
+
+cp /vagrant/mail/dovecot/dovecot.conf /etc/dovecot/dovecot.conf
+cp /vagrant/mail/dovecot/dovecot-ldap.conf /etc/dovecot/dovecot-ldap.conf
+
+mkdir -p /var/mail/vmail
+groupadd -g 5000 vmail 2>/dev/null || true
+useradd -g vmail -u 5000 vmail -d /var/mail/vmail 2>/dev/null || true
+chown -R vmail:vmail /var/mail/vmail
+chmod -R 770 /var/mail/vmail
+
+cp /vagrant/_global/resolv.conf /etc/resolv.conf
+
+systemctl enable postfix
+systemctl enable dovecot
+
+systemctl restart postfix
+systemctl restart dovecot
+
+echo "Mail server for domain rouge.iut is up and running"
+SHELL
+  end
+
+  config.vm.define "dns" do |dns|
+    dns.vm.hostname = "dns"
+    dns.vm.network "public_network",
+      ip: "192.168.2.5",
+      netmask: "255.255.255.224",
+      bridge: "enp3s0"
+    dns.vm.provision "shell", inline: <<-SHELL
+apt update
+apt install -y bind9 bind9utils bind9-doc dnsutils
+
+cp /etc/bind/named.conf.options /etc/bind/named.conf.options.orig
+cp /etc/bind/named.conf.local /etc/bind/named.conf.local.orig
+
+cp /vagrant/dns/named.conf.options /etc/bind/named.conf.options
+cp /vagrant/dns/named.conf.local /etc/bind/named.conf.local
+cp /vagrant/dns/db.rouge.iut /etc/bind/db.rouge.iut
+
+cp /vagrant/_global/resolv.conf /etc/resolv.conf
+
+systemctl enable named
+systemctl restart named
+
+echo "DNS server for domain rouge.iut is up and running"
+    SHELL
+  end
+end

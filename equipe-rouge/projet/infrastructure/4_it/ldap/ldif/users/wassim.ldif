@@ -1,0 +1,14 @@
+dn: uid=wkoudamra,ou=users,dc=rouge,dc=iut
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: wkoudamra
+cn: Wassim KOUDAMRA
+sn: KOUDAMRA
+givenName: Wassim
+mail: wkoudamra@rouge.iut
+userPassword: {SSHA}xgXkc00QPQURbDOE0XEsAouT/aR/RZlJ
+uidNumber: 10002
+gidNumber: 10000
+homeDirectory: /home/wkoudamra
+loginShell: /bin/bash

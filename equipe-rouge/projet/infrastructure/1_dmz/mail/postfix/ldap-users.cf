@@ -1,0 +1,11 @@
+server_host = 192.168.2.100
+server_port = 389
+search_base = ou=users,dc=rouge,dc=iut
+version = 3
+bind = yes
+bind_dn = cn=admin,dc=rouge,dc=iut
+bind_pw = admin
+
+query_filter = (&(objectClass=inetOrgPerson)(mail=%s))
+result_attribute = uid
+result_format = %s/Maildir/

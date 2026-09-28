@@ -1,0 +1,11 @@
+server {
+    listen 80;
+    server_name autoconfig.rouge.iut;
+
+    root /var/www/autoconfig;
+
+    location /mail/config-v1.1.xml {
+        default_type application/xml;
+        add_header Content-Type "application/xml; charset=utf-8";
+    }
+}

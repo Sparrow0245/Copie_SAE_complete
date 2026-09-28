@@ -1,0 +1,196 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+    vb.cpus = 2
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    ip route replace 192.168.0.0/16 via 192.168.2.97
+  SHELL
+
+  config.vm.define "dhcp" do |dhcp|
+    dhcp.vm.hostname = "dhcp"
+    dhcp.vm.network "public_network",
+      ip: "192.168.2.99",
+      netmask: "255.255.255.224",
+      bridge: "enp3s0"
+    dhcp.vm.provision "shell", inline: <<-SHELL
+apt update
+RUNLEVEL=1 DEBIAN_FRONTEND=noninteractive apt install -y isc-dhcp-server
+
+sed -i -e 's/INTERFACESv4=""/INTERFACESv4="eth1"/g' /etc/default/isc-dhcp-server
+cp /vagrant/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf
+
+cp /vagrant/_global/resolv.conf /etc/resolv.conf
+
+systemctl enable isc-dhcp-server
+systemctl restart isc-dhcp-server
+
+echo "DHCP server is up and running"
+SHELL
+  end
+
+  config.vm.define "ldap" do |ldap|
+    ldap.vm.hostname = "ldap"
+    ldap.vm.network "public_network",
+      ip: "192.168.2.100",
+      netmask: "255.255.255.224",
+      bridge: "enp3s0"
+    ldap.vm.provision "shell", inline: <<-SHELL
+apt update
+DEBIAN_FRONTEND=noninteractive apt install -y slapd ldap-utils python3
+
+echo "slapd slapd/internal/generated_adminpw password admin" | debconf-set-selections
+echo "slapd slapd/internal/adminpw password admin" | debconf-set-selections
+echo "slapd slapd/password2 password admin" | debconf-set-selections
+echo "slapd slapd/password1 password admin" | debconf-set-selections
+echo "slapd slapd/domain string rouge.iut" | debconf-set-selections
+echo "slapd shared/organization string rouge.iut" | debconf-set-selections
+
+dpkg-reconfigure -f noninteractive slapd
+
+sleep 3
+
+mkdir -p /tmp/users
+cp /vagrant/ldap/ldif/*.ldif /tmp/
+cp /vagrant/ldap/ldif/users/*.ldif /tmp/users/
+
+ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/1_change_admin_pw.ldif
+ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/2_config_acl_rules.ldif
+
+ldapadd -x -D "cn=admin,dc=rouge,dc=iut" -w admin -f /tmp/3_structure.ldif
+
+ldapadd -x -D "cn=admin,dc=rouge,dc=iut" -w admin -f /tmp/users/matisse.ldif
+ldapadd -x -D "cn=admin,dc=rouge,dc=iut" -w admin -f /tmp/users/nicolas.ldif
+ldapadd -x -D "cn=admin,dc=rouge,dc=iut" -w admin -f /tmp/users/wassim.ldif
+
+mkdir /home/vagrant/ldap_scripts
+cp /vagrant/ldap/py/* /home/vagrant/ldap_scripts/
+
+systemctl enable slapd
+systemctl restart slapd
+
+echo "LDAP server is up and running"
+
+cp /vagrant/_global/resolv.conf /etc/resolv.conf
+    SHELL
+  end
+
+  config.vm.define "nfs" do |nfs|
+    nfs.vm.hostname = "nfs"
+    nfs.vm.network "public_network",
+      ip: "192.168.2.101",
+      netmask: "255.255.255.224",
+      bridge: "enp3s0"
+    nfs.vm.provision "shell", inline: <<-SHELL
+apt update
+apt install -y nfs-kernel-server
+
+mkdir -p /srv/nfs/homedirs
+echo "/srv/nfs/homedirs 192.168.2.0/24(rw,sync,no_subtree_check,no_root_squash,insecure)" >> /etc/exports
+
+systemctl enable nfs-kernel-server
+systemctl restart nfs-kernel-server
+
+exportfs -arv
+
+cp /vagrant/_global/resolv.conf /etc/resolv.conf
+
+echo "NFS server is up and running"
+    SHELL
+  end
+
+  config.vm.define "proxy" do |proxy|
+    proxy.vm.hostname = "proxy"
+    proxy.vm.network "public_network",
+      ip: "192.168.2.102",
+      netmask: "255.255.255.224",
+      bridge: "enp3s0"
+    proxy.vm.provision "shell", inline: <<-SHELL
+apt update
+apt install -y squid
+
+cp /etc/squid/squid.conf /etc/squid/squid.conf.orig
+cp /vagrant/proxy/squid.conf /etc/squid/squid.conf
+
+squid -z
+
+systemctl enable squid
+systemctl restart squid
+
+cp /vagrant/_global/resolv.conf /etc/resolv.conf
+    SHELL
+  end
+
+  config.vm.define "ws1" do |ws1|
+    ws1.vm.hostname = "ws1-it"
+    ws1.vm.network "public_network",
+      bridge: "enp3s0"
+    ws1.vm.provider "virtualbox" do |vb|
+      vb.gui = true
+    end
+    ws1.vm.provision "shell", inline: <<-SHELL
+apt update
+apt install -y firefox-esr thunderbird xauth
+
+echo "session required pam_mkhomedir.so skel=/etc/skel umask=0022" >> /etc/pam.d/common-session
+
+DEBIAN_FRONTEND=noninteractive apt install -y libnss-ldap libpam-ldap nslcd
+
+cp /vagrant/ws/nsswitch.conf /etc/nsswitch.conf
+cp /vagrant/ws/nslcd.conf /etc/nslcd.conf
+chmod 640 /etc/nslcd.conf
+chown root:nslcd /etc/nslcd.conf
+
+systemctl stop nscd
+systemctl disable nscd
+systemctl mask nscd
+
+systemctl enable nslcd
+systemctl restart nslcd
+
+apt install -y nfs-common
+
+echo "192.168.2.101:/srv/nfs/homedirs /home nfs defaults,_netdev 0 0" >> /etc/fstab
+
+dpkg-reconfigure -f noninteractive keyboard-configuration
+
+DEBIAN_FRONTEND=noninteractive apt install -y mate-desktop-environment lightdm xorg
+
+systemctl set-default graphical.target
+systemctl enable lightdm
+
+systemctl start lightdm
+
+apt install -y console-data keyboard-configuration
+
+loadkeys fr-latin9
+localectl set-keymap fr-latin9
+
+localectl set-x11-keymap fr pc105
+setxkbmap fr || true
+
+cat << 'EOF' > /etc/systemd/system/custom-route.service
+[Unit]
+Description=Add custom static route
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/ip route replace 192.168.0.0/16 via 192.168.2.97
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable custom-route.service
+    SHELL
+  end
+end

@@ -1,0 +1,14 @@
+dn: uid=mdekeiser,ou=users,dc=rouge,dc=iut
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: mdekeiser
+cn: Matisse DEKEISER
+sn: DEKEISER
+givenName: Matisse
+mail: mdekeiser@rouge.iut
+userPassword: {SSHA}LeLDDfuKlw0mTamR8GlXrwJ/j7aFPzaS
+uidNumber: 10000
+gidNumber: 10000
+homeDirectory: /home/mdekeiser
+loginShell: /bin/bash
