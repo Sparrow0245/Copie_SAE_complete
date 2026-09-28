@@ -1,0 +1,1 @@
+192.168.4.80:/home /home nfs defaults,user,auto,_netdev,bg 0 0 

@@ -1,0 +1,6 @@
+dn: olcDatabase={2}mdb,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: to attrs=userPassword,email,telephoneNumber by dn=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by self write by anonymous auth by * none
+olcAccess: to attrs=shadowLastChange by dn=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by self write by * read
+olcAccess: to * by dn=gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth manage by * read

@@ -1,0 +1,6 @@
+dn: dc=noir,dc=iut
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: Noir IUT
+dc: noir

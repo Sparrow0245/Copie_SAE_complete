@@ -1,0 +1,44 @@
+dn: ou=users,dc=noir,dc=iut
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=noir,dc=iut
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=maxence.antoine,ou=users,dc=but3b,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: Maxence antoine
+sn: antoine
+mail: maxence.antoine@noir.iut
+uid: maxence.antoine
+userPassword: mantoine
+uidNumber: 5003
+gidNumber: 5000
+homeDirectory: /home/maxence.antoine/
+
+dn: uid=vincent.jacquemelle,ou=users,dc=but3b,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: Vincent JACQUEMELLE
+sn: JACQUEMELLE
+mail: vincent.jacquemelle@noir.iut
+uid: vincent.jacquemelle
+userPassword: vjacquemelle
+uidNumber: 5001
+gidNumber: 5000
+homeDirectory: /home/vincent.jacquemelle/
+
+dn: uid=sofiane.el-bouhali,ou=users,dc=but3b,dc=local
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: sofiane el-bouhali
+sn: EL-BOUHALI
+mail: sofiane.el-bouhali@noir.iut
+uid: sofiane.el-bouhali
+userPassword: selbouhali
+uidNumber: 5002
+gidNumber: 5000
+homeDirectory: /home/sofiane.elbouhali/
+
