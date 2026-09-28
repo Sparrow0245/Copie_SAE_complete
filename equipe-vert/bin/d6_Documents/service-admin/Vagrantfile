@@ -1,0 +1,47 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "debian/bookworm64"
+
+
+  config.vm.define "posteAdmin1" do |conf|
+    conf.vm.hostname = "posteAdmin1"
+    conf.vm.network "public_network", ip: "192.168.3.70", netmask: "255.255.255.192",bridge: "enp3s0"
+
+    conf.vm.provision "shell", inline: <<-SHELL
+      sudo apt update
+      sudo apt install -y xfce4 lightdm firefox-esr thunderbird thunderbird-l10n-fr
+      sudo sed -i 's/allowed_users=console/allowed_users=anybody/' /etc/X11/Xwrapper.config
+    SHELL
+  end
+
+
+  config.vm.define "posteAdmin2" do |conf|
+    conf.vm.hostname = "posteAdmin2"
+    conf.vm.network "public_network", ip: "192.168.3.71", netmask: "255.255.255.192" ,bridge: "enp3s0"
+
+    conf.vm.provision "shell", inline: <<-SHELL
+      sudo apt update
+      sudo apt install -y xfce4 lightdm firefox-esr thunderbird thunderbird-l10n-fr
+      sudo sed -i 's/allowed_users=console/allowed_users=anybody/' /etc/X11/Xwrapper.config
+    SHELL
+  end
+
+
+  config.vm.define "nss-pam-admin" do |conf|
+    conf.vm.hostname = "nss-pam-admin"
+    conf.vm.network "public_network", ip: "192.168.3.72", netmask: "255.255.255.192",bridge: "enp3s0"
+  end
+
+ config.vm.define "test-admin" do |test|
+    test.vm.hostname = "test-admin"
+    test.vm.network "public_network", ip: "192.168.3.73", netmask: "255.255.255.192",bridge: "enp3s0"
+  end
+  
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+    vb.cpus = 2
+  end
+end

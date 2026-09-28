@@ -1,0 +1,73 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+
+  config.vm.define "info-vert" do |conf|
+    conf.vm.hostname = "info-vert"
+    conf.vm.network "public_network",
+      ip: "192.168.3.2",
+      netmask: "255.255.255.192",
+      bridge: "enp3s0"
+    #conf.vm.provision "shell", path: "conf_vm_info"
+    #conf.vm.provision "shell", path: "setup-dhcp.sh"
+  end
+
+  config.vm.define "info-vert-dhcp-test" do |conf|
+    conf.vm.hostname = "info-vert-dhcp-test"
+    conf.vm.network "public_network", type: "dhcp", bridge: "enp3s0"
+  end
+
+   config.vm.define "ldap-vert" do |conf|
+    conf.vm.hostname = "ldap-vert"
+    conf.vm.network "public_network",
+      ip: "192.168.3.3",
+      netmask: "255.255.255.192",
+      bridge: "enp3s0"
+    #conf.vm.provision "shell", path: "setup-dhcp.sh"
+  end
+
+
+  config.vm.define "pam-nss-vert" do |conf|
+    conf.vm.hostname = "pam-nss-vert"
+    conf.vm.network "public_network",
+      ip: "192.168.3.4",
+      netmask: "255.255.255.192",
+      bridge: "enp3s0"
+      
+  end
+
+
+
+   config.vm.define "nfs-vert" do |conf|
+    conf.vm.hostname = "nfs-vert"
+    conf.vm.network "public_network",
+      ip: "192.168.3.5",
+      netmask: "255.255.255.192",
+      bridge: "enp3s0"
+      
+  end
+  config.vm.define "poste1-Info" do |conf|
+    conf.vm.hostname = "poste1-Info"
+    conf.vm.network "public_network", ip: "192.168.3.7", netmask: "255.255.255.192",bridge: "enp3s0"
+
+    conf.vm.provision "shell", inline: <<-SHELL
+      sudo apt update
+      sudo apt install -y xfce4 lightdm firefox-esr thunderbird thunderbird-l10n-fr
+      sudo sed -i 's/allowed_users=console/allowed_users=anybody/' /etc/X11/Xwrapper.config
+    SHELL
+  end
+
+ config.vm.define "squid-proxy-vert" do |conf|
+    conf.vm.hostname = "squid-proxy-vert"
+    conf.vm.network "public_network",
+      ip: "192.168.3.22",          # IP sur ton réseau physique
+      netmask: "255.255.255.192",  # Masque /26
+      bridge: "enp3s0"          # Interface physique de ton hôte
+    #conf.vm.provision "shell", path: "squid_setup.sh"
+  end
+
+  
+end
+

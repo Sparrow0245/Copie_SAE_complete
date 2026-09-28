@@ -1,0 +1,5 @@
+#!/bin/bash
+
+ip route del default
+dhclient -r eth1
+dhclient -v eth1

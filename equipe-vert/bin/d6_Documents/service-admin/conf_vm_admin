@@ -1,0 +1,11 @@
+#!/bin/bash
+
+sudo ip r add 192.168.0.0/16 via 192.168.3.126 dev eth1
+
+echo "
+domain vert.iut
+search vert.iut
+nameserver 192.168.3.194
+" > /etc/resolv.conf
+
+

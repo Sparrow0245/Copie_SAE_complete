@@ -1,0 +1,3 @@
+id -u kevin &>/dev/null || /usr/sbin/adduser --gecos "" kevin
+id -u mohane &>/dev/null || /usr/sbin/adduser --gecos "" mohane
+id -u minhtue &>/dev/null || /usr/sbin/adduser --gecos "" minhtue

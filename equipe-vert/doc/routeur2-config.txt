@@ -1,0 +1,115 @@
+!
+! Last configuration change at 15:35:35 UTC Thu Dec 11 2025
+! NVRAM config last updated at 15:35:42 UTC Thu Dec 11 2025
+!
+version 15.0
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname r2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+no aaa new-model
+!
+!
+!
+memory-size iomem 10
+!
+!
+ip source-route
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+multilink bundle-name authenticated
+license udi pid CISCO881-SEC-K9 sn FCZ1607939U
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface FastEthernet0
+ switchport access vlan 10
+ !
+!
+interface FastEthernet1
+ switchport access vlan 20
+ !
+!
+interface FastEthernet2
+ switchport access vlan 30
+ !
+!
+interface FastEthernet3
+ !
+!
+interface FastEthernet4
+ ip address 192.168.3.253 255.255.255.192
+ duplex auto
+ speed auto
+ !
+!
+interface Vlan1
+ no ip address
+ !
+!
+interface Vlan10
+ ip address 192.168.3.62 255.255.255.192
+ ip helper-address 192.168.3.2
+ !
+!
+interface Vlan20
+ ip address 192.168.3.126 255.255.255.192
+ ip helper-address 192.168.3.2
+ !
+!
+interface Vlan30
+ ip address 192.168.3.190 255.255.255.192
+ ip helper-address 192.168.3.2
+ !
+!
+router rip
+ version 2
+ network 10.0.0.0
+!
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+!
+ip route 192.168.1.96 255.255.255.224 FastEthernet4
+ip route 192.168.2.0 255.255.255.0 FastEthernet4
+ip route 192.168.4.0 255.255.255.192 FastEthernet4
+!
+!
+!
+!
+!
+!
+control-plane
+ !
+!
+!
+line con 0
+ no modem enable
+line aux 0
+line vty 0 4
+ login
+!
+scheduler max-task-time 5000
+end

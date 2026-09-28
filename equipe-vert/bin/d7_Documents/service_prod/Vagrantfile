@@ -1,0 +1,52 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Configuration globale pour toutes les machines
+  config.vm.box = "debian/bookworm64"
+
+  # --- Machine Test (Client pour tester le proxy) ---
+  config.vm.define "Test" do |test|
+    test.vm.hostname = "Test"
+    test.vm.network "public_network",
+      ip: "192.168.3.140",
+      netmask: "255.255.255.192",
+      bridge: "enp3s0"
+
+    test.vm.provision "shell", inline: <<-SHELL, privileged: true
+      # Mise à jour des paquets et installation de curl
+      apt-get update -qq
+      apt-get install -y curl
+
+      # Configuration de la route par défaut (vers le proxy)
+      ip route del default via 10.0.2.2 2>/dev/null || true
+      ip route add default via 192.168.3.6 dev eth0
+
+      # Configuration du proxy pour apt et l'utilisateur
+      echo 'Acquire::http::Proxy "http://192.168.3.6:3128";' > /etc/apt/apt.conf.d/proxy.conf
+      echo 'Acquire::https::Proxy "http://192.168.3.6:3128";' >> /etc/apt/apt.conf.d/proxy.conf
+      echo 'export http_proxy="http://192.168.3.6:3128"' >> /home/vagrant/.bashrc
+      echo 'export https_proxy="http://192.168.3.6:3128"' >> /home/vagrant/.bashrc
+      source /home/vagrant/.bashrc
+    SHELL
+  end
+
+  # --- Machine prod-vert (Réseau public) ---
+  config.vm.define "prod-vert" do |prod|
+    prod.vm.hostname = "prod-vert"
+    prod.vm.network "public_network",
+      ip: "192.168.3.147",          # IP publique (à adapter selon votre réseau physique)
+      netmask: "255.255.255.192",   # Masque pour /26
+      bridge: "enp3s0"             # Interface réseau physique (à adapter)
+  end
+
+
+   # --- Machine pam-vert (Réseau public) ---
+  config.vm.define "pam-prod-vert" do |prod|
+    prod.vm.hostname = "pam-prod-vert"
+    prod.vm.network "public_network",
+      ip: "192.168.3.148",          # IP publique (à adapter selon votre réseau physique)
+      netmask: "255.255.255.192",   # Masque pour /26
+      bridge: "enp3s0"             # Interface réseau physique (à adapter)
+  end
+end
